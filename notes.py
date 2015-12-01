@@ -31,7 +31,23 @@ for i in range(3):
     print type(out)
     print type(v1)
 
+print v1._AsTensor().eval(session=sess)             #allows you to see the value of the variable
 
-    # print v1._AsTensor().eval(session=sess)             #allows you to see the value of the variable
+#built in neural network functions
+#activation
+tf.nn.sigmoid()
+# tf.nn.tanh()
+# tf.nn.relu()
 
+#cost
+#tf.nn.sigmoid_cross_entropy_with_logits
+#tf.nn.softmax
+#tf.nn.softmax_cross_entropy_with_logits
+
+#BUILD FEEDFORWARD WITH NO ACTIVATION
+#BUILD COST WITH tf.softmax_cross_entropy_with_logits(FF)
+#BUILD PREDICT WITH tf.softmax(FF)
+
+
+tf.nn.embedding_ops
 
