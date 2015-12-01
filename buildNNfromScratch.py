@@ -41,7 +41,7 @@ b2 = tf.Variable(tf.random_normal([1, outputUnits], mean=0, stddev=math.sqrt(flo
 
 
 #feedforward graph
-def feedForward(input_, W1_, W2_, b1_, b2, activation):
+def feedForward(input_, W1_, W2_, b1_, b2_, activation):
     #input to hidden
     z1 = tf.add (
                     tf.matmul   (
@@ -67,7 +67,7 @@ def feedForward(input_, W1_, W2_, b1_, b2, activation):
                                     a1,
                                     W2_
                                 ),
-                    b2
+                    b2_
                 )
 
     return z2
@@ -81,6 +81,7 @@ ffOp = feedForward(input, W1, W2, b1, b2, "relu")
 #cost activation
 #cross entropy portion
 crossEntropyOp = tf.nn.softmax_cross_entropy_with_logits(ffOp, label, name="CrossEntropy")
+# crossEntropyOp = tf.nn.softmax_cross_entropy_with_logits(ffOp, trainX, name="CrossEntropy")
 #loss portion
 lossOp = tf.reduce_mean(crossEntropyOp, name="Loss")
 
@@ -105,6 +106,11 @@ sess = tf.Session()
 #initialize all variables
 sess.run(initOp)
 
+# ff = sess.run(ffOp)
+# print ff
+# cost = sess.run(lossOp)
+# print cost
+
 
 def train(numberOfIterations):
     #number of training items
@@ -115,28 +121,46 @@ def train(numberOfIterations):
     avgCost = 0
 
     #initial parameters (for comparison after training)
-    initialW1 = W1.initialized_value()._AsTensor().eval(session=sess)
-    initialW2 = W2.initialized_value()._AsTensor().eval(session=sess)
-    initialb1 = b1.initialized_value()._AsTensor().eval(session=sess)
-    initialb2 = b2.initialized_value()._AsTensor().eval(session=sess)
+    initialW1 = W1.initialized_value()
+    initialW2 = W2.initialized_value()
+    initialb1 = b1.initialized_value()
+    initialb2 = b2.initialized_value()
 
+
+    # #for each training iteration
+    # for i in range(numberOfIterations):
+    #     #for each batch
+    #     for j in range(batches):
+    #         #TODO confirm this is correct
+    #         trainBatchX = trainX[batchSize * j: batchSize * (j+1)]
+    #         trainBatchY = trainY[batchSize * j: batchSize * (j+1)]
+    #         #run training
+    #             #need to use feed_dict to put data items into placeholder spots
+    #         sess.run(gradientOp, feed_dict={input: trainBatchX, label: trainBatchY})
+    #         #compute average cost for printing
+    #         avgCost = sess.run(lossOp, feed_dict={input: trainBatchX, label: trainBatchY})
+    #     #print
+    #     print "iteration %s with average cost of %s" %(str(i),str(avgCost))
 
     #for each training iteration
     for i in range(numberOfIterations):
-        #for each batch
-        for j in range(batches):
-            #TODO confirm this is correct
-            trainBatchX = trainX[batchSize * j: batchSize * (j+1)]
-            trainBatchY = trainY[batchSize * j: batchSize * (j+1)]
-            #run training
-                #need to use feed_dict to put data items into placeholder spots
-            sess.run(gradientOp, feed_dict={input: trainBatchX, label: trainBatchY})
-            #compute average cost for printing
-            avgCost = sess.run(lossOp, feed_dict={input: trainBatchX, label: trainBatchY})
+        #run training
+            #need to use feed_dict to put data items into placeholder spots
+        sess.run(gradientOp, feed_dict={input: trainX, label: trainX})          #label is trainX b/c autoencoder
+        #compute average cost for printing
+        avgCost = sess.run(lossOp, feed_dict={input: trainX, label: trainX})    #label is trainX b/c autoencoder
         #print
         print "iteration %s with average cost of %s" %(str(i),str(avgCost))
 
+    #difference in parameters after training
+    diffW1 = W1.eval(session=sess) - initialW1
+    diffW2 = W2.eval(session=sess) - initialW2
+    diffB1 = b1.eval(session=sess) - initialb1
+    diffB2 = b2.eval(session=sess) - initialb2
 
+    print diffW1.eval(session=sess)
+
+train(10)
 
 
 
