@@ -35,7 +35,7 @@ W2 = tf.Variable(tf.random_normal([hiddenUnits, outputUnits], mean=0, stddev=mat
 b1 = tf.Variable(tf.random_normal([1, hiddenUnits], mean=0, stddev=math.sqrt(float(6) / float(inputUnits * 2))), name="b1")
 #with b1 being tiled
 # b1 = tf.Variable(tf.random_normal([batchSize, hiddenUnits], mean=0, stddev=math.sqrt(float(6) / float(inputUnits * 2))), name="b1")
-b2 = tf.Variable(tf.random_normal([hiddenUnits, 1], mean=0, stddev=math.sqrt(float(6) / float(inputUnits * 2))), name="b2")
+b2 = tf.Variable(tf.random_normal([1, outputUnits], mean=0, stddev=math.sqrt(float(6) / float(inputUnits * 2))), name="b2")
 #with b2 being tiled
 # b2 = tf.Variable(tf.random_normal([hiddenUnits, batchSize], mean=0, stddev=math.sqrt(float(6) / float(inputUnits * 2))), name="b2")
 
@@ -75,13 +75,14 @@ def feedForward(input_, W1_, W2_, b1_, b2, activation):
 
 #output of the feed forward process
 ffOp = feedForward(input, W1, W2, b1, b2, "relu")
+# ffOp = feedForward(trainX, W1, W2, b1, b2, "relu")
 
 
 #cost activation
 #cross entropy portion
-crossEntropyOp = tf.nn.softmax_cross_entropy_with_logits(ff, label, name="CrossEntropy")
+crossEntropyOp = tf.nn.softmax_cross_entropy_with_logits(ffOp, label, name="CrossEntropy")
 #loss portion
-lossOp = tf.reduce_mean(crossEntropy, name="Loss")
+lossOp = tf.reduce_mean(crossEntropyOp, name="Loss")
 
 
 #gradient descent
@@ -110,6 +111,15 @@ def train(numberOfIterations):
     trainSize = trainX.shape[0]
     #items per batch
     batches = int(trainSize / batchSize)
+    #initialize variable to be used later
+    avgCost = 0
+
+    #initial parameters (for comparison after training)
+    initialW1 = W1.initialized_value()._AsTensor().eval(session=sess)
+    initialW2 = W2.initialized_value()._AsTensor().eval(session=sess)
+    initialb1 = b1.initialized_value()._AsTensor().eval(session=sess)
+    initialb2 = b2.initialized_value()._AsTensor().eval(session=sess)
+
 
     #for each training iteration
     for i in range(numberOfIterations):
@@ -118,7 +128,13 @@ def train(numberOfIterations):
             #TODO confirm this is correct
             trainBatchX = trainX[batchSize * j: batchSize * (j+1)]
             trainBatchY = trainY[batchSize * j: batchSize * (j+1)]
-
+            #run training
+                #need to use feed_dict to put data items into placeholder spots
+            sess.run(gradientOp, feed_dict={input: trainBatchX, label: trainBatchY})
+            #compute average cost for printing
+            avgCost = sess.run(lossOp, feed_dict={input: trainBatchX, label: trainBatchY})
+        #print
+        print "iteration %s with average cost of %s" %(str(i),str(avgCost))
 
 
 
