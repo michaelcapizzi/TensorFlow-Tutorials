@@ -33,7 +33,13 @@ init = tf.initialize_all_variables()
 sess.run(init)
 
 for i in range(100):
+    #old weights before iteration update
+    updated = w_h.initialized_value()
     for start, end in zip(range(0, len(trX), 128), range(128, len(trX), 128)):
         sess.run(train_op, feed_dict={X: trX[start:end], Y: trY[start:end]})
+    #TODO add step to take difference between old and updated
+    diff_op = tf.sub(w_h, updated)
+    diff = sess.run(diff_op)
+    print diff
     print i, np.mean(np.argmax(teY, axis=1) ==
                      sess.run(predict_op, feed_dict={X: teX, Y: teY}))
