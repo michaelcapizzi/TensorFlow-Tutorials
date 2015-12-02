@@ -148,9 +148,14 @@ def train(numberOfIterations):
             #need to use feed_dict to put data items into placeholder spots
         sess.run(gradientOp, feed_dict={input: trainX, label: trainX})          #label is trainX b/c autoencoder
         #compute average cost for printing
-        avgCost = sess.run(lossOp, feed_dict={input: trainX, label: trainX})    #label is trainX b/c autoencoder
-        #print
-        print "iteration %s with average cost of %s" %(str(i),str(avgCost))
+        newCost = sess.run(lossOp, feed_dict={input: trainX, label: trainX})    #label is trainX b/c autoencoder
+        diff = avgCost - newCost
+        avgCost = newCost
+        if i > 0 and diff < .000001:
+            break
+        else:
+            #print
+            print "iteration %s with average cost of %s and diff of %s" %(str(i),str(avgCost), str(diff))
 
     #difference in parameters after training
     diffW1 = W1.eval(session=sess) - initialW1
@@ -160,7 +165,7 @@ def train(numberOfIterations):
 
     print diffW1.eval(session=sess)
 
-train(10)
+train(1000)
 
 
 
