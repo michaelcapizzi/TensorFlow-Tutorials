@@ -152,10 +152,12 @@ def train(numberOfIterations):
         diff = avgCost - newCost
         avgCost = newCost
         if i > 0 and diff < .000001:
+            print("Convergence at iteration %s with average cost of %s and diff of %s" %(str(i),str(avgCost), str(diff)))
             break
         else:
             #print
-            print "iteration %s with average cost of %s and diff of %s" %(str(i),str(avgCost), str(diff))
+            print("iteration %s with average cost of %s and diff of %s" %(str(i),str(avgCost), str(diff)))
+    print("No convergence after %s iterations" %str(numberOfIterations))
 
     #difference in parameters after training
     diffW1 = W1.eval(session=sess) - initialW1
@@ -165,7 +167,22 @@ def train(numberOfIterations):
 
     print diffW1.eval(session=sess)
 
-train(1000)
+
+#saves ALL variables
+    #if variableDict = none, all variables are saved
+def saveVariables(fname, variableDict=None):
+    saver = tf.train.Saver(variableDict)
+    saver.save(sess, fname + ".ckpt")
+
+
+#loads ALL variables
+def loadVariables(fname):
+    saver = tf.train.Saver()
+    saver.restore(sess, fname + ".ckpt")
+
+train(5000)
+# saveVariable(W1, "testSaveW1")
+# saveVariable(W2, "testSaveW2")
 
 
 
