@@ -85,9 +85,18 @@ crossEntropyOp = tf.nn.softmax_cross_entropy_with_logits(ffOp, label, name="Cros
 #loss portion
 lossOp = tf.reduce_mean(crossEntropyOp, name="Loss")
 
+#exponential decay
+learning_rate = tf.train.exponential_decay(
+    learning_rate=0.01,
+    global_step= 1,
+    decay_steps=10000,   #should be size of data?
+    decay_rate= 0.95,
+    staircase=True
+)
 
 #gradient descent
 gradientOp = tf.train.GradientDescentOptimizer(alpha).minimize(lossOp)
+# gradientOp = tf.train.GradientDescentOptimizer(learning_rate).minimize(lossOp)
 
 
 #for predictions
@@ -110,7 +119,6 @@ sess.run(initOp)
 # print ff
 # cost = sess.run(lossOp)
 # print cost
-
 
 def train(numberOfIterations):
     #number of training items
@@ -151,13 +159,15 @@ def train(numberOfIterations):
         newCost = sess.run(lossOp, feed_dict={input: trainX, label: trainX})    #label is trainX b/c autoencoder
         diff = avgCost - newCost
         avgCost = newCost
-        if i > 0 and diff < .000001:
+        #convergence conditions
+        # if i > 0 and math.fabs(diff) < .000001:
+        if i > 0 and math.fabs(diff) < .000001:
             print("Convergence at iteration %s with average cost of %s and diff of %s" %(str(i),str(avgCost), str(diff)))
             break
         else:
             #print
             print("iteration %s with average cost of %s and diff of %s" %(str(i),str(avgCost), str(diff)))
-    print("No convergence after %s iterations" %str(numberOfIterations))
+    # print("No convergence after %s iterations" %str(numberOfIterations))
 
     #difference in parameters after training
     diffW1 = W1.eval(session=sess) - initialW1
@@ -165,7 +175,7 @@ def train(numberOfIterations):
     diffB1 = b1.eval(session=sess) - initialb1
     diffB2 = b2.eval(session=sess) - initialb2
 
-    print diffW1.eval(session=sess)
+    # print diffW1.eval(session=sess)
 
 
 #saves ALL variables
